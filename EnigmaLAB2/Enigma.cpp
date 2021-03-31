@@ -50,14 +50,14 @@ std::string encrypt(
 	for (auto c : message)
 	{
 		wheelSum = 0;
-		c -= 32;
+		c -= ' ';
 		for (int i = 0; i < K; i++)
 		{
 			wheelSum += enigma[i][state[i]];
 		}
-		wheelSum = (wheelSum + c) % 95;
+		wheelSum = (wheelSum + c) % '_';
 		c = wheelSum;
-		c += 32;
+		c += ' ';
 		encrypted += c;
 		plusState(state);
 	}
@@ -82,16 +82,16 @@ std::string decrypt(
 		minusState(state);
 		wheelSum = 0;
 		c = message[j];
-		c -= 32;
+		c -= ' ';
 		for (int i = 0; i < K; i++)
 		{
 			wheelSum += enigma[i][state[i]];
 		}
 		integerC = c;
 		integerC -= wheelSum;
-		while (integerC < 0) integerC += 95;
+		while (integerC < 0) integerC += '_';
 		c = integerC;
-		c += 32;
+		c += ' ';
 		decrypted = c + decrypted;
 	}
 	return decrypted;
@@ -108,6 +108,71 @@ std::ostream& operator<<(std::ostream& os, EnigmaState& state)
 };
 std::istream& operator>>(std::istream& is, EnigmaState& state)
 {
+	// kod dzia³a kiedy wpiszemy wszystkie liczby po przecinku: 1,2,3,4
+	std::string input;
+	getline(is, input);
+	std::string number_to_be;
+	std::array<int, K> new_state;
+	int control_counter = 0;
+	int iterator = 0;
+	int input_length = input.length();
+	bool end_of_string = false;
+	bool number_not_complete = true;
+	if (input[0])
+	{
+		while (control_counter < 4)
+		{
+			number_to_be = "";
+			number_not_complete = true;
+			while (number_not_complete)
+			{
+				if (input[iterator] <= '9' && input[iterator] >= '0')
+				{
+					number_to_be += input[iterator];
+				}
+				if (iterator + 1 < input.length())
+				{
+					if (input[iterator + 1] <= '9' && input[iterator + 1] >= '0')
+					{
+						iterator++;
+						continue;
+					}
+					else
+					{
+						number_not_complete = false;
+						new_state[control_counter] = stoi(number_to_be)-1;
+						control_counter++;
+						iterator++;
+					}
+				}
+				else
+				{
+					number_not_complete = false;
+					new_state[control_counter] = stoi(number_to_be) - 1;
+					control_counter++;
+					end_of_string = true;
+					break;
+				}
+			}
+			if (end_of_string)
+			{
+				if (new_state[3])
+				{
+					for (int i = 0; i < K; i++) state[i] = new_state[i];
+					return is;
+				}
+				else return is;
+			}
+		}
+	}
+	else return is;
+	if (new_state[3])
+	{
+		for (int i = 0; i < K; i++) state[i] = new_state[i];
+		return is;
+	}
+	else return is;
+	/*
 	int input;
 	for (int i = 0; i < K; i++)
 	{
@@ -115,7 +180,7 @@ std::istream& operator>>(std::istream& is, EnigmaState& state)
 		std::cin >> input;
 		state[i] = input-1;
 	}
-	return is;
+	return is;*/
 };
 
 std::ostream& operator<<(std::ostream& os, Enigma& enigma)
@@ -133,7 +198,81 @@ std::ostream& operator<<(std::ostream& os, Enigma& enigma)
 };
 std::istream& operator>>(std::istream& is, Enigma& enigma)
 {
-	int input;
+	// kod dzia³a kiedy wpiszemy wszystkie liczby po przecinku: 1,2,3,4
+	std::string input;
+	getline(is, input);
+	std::string number_to_be;
+	std::array<int, K*N> new_enigma;
+	int control_counter = 0;
+	int iterator = 0;
+	int input_length = input.length();
+	bool end_of_string = false;
+	bool number_not_complete = true;
+	int helping_number = 0;
+	if (input[0])
+	{
+		while (control_counter < 4)
+		{
+			number_to_be = "";
+			number_not_complete = true;
+			while (number_not_complete)
+			{
+				if (input[iterator] <= '9' && input[iterator] >= '0')
+				{
+					number_to_be += input[iterator];
+				}
+				if (iterator + 1 < input.length())
+				{
+					std::cout << input[iterator + 1] << std::endl;
+					if (input[iterator + 1] <= '9' && input[iterator + 1] >= '0')
+					{
+						iterator++;
+						continue;
+					}
+					else
+					{
+						number_not_complete = false;
+						new_enigma[control_counter] = stoi(number_to_be) - 1;
+						control_counter++;
+						iterator++;
+					}
+				}
+				else
+				{
+					number_not_complete = false;
+					new_enigma[control_counter] = stoi(number_to_be) - 1;
+					control_counter++;
+					end_of_string = true;
+					break;
+				}
+			}
+			if (end_of_string)
+			{
+				if (new_enigma[3])
+				{
+					for (int i = 0; i < K * N; i++)
+					{
+						helping_number = i / N;
+						enigma[helping_number][i % N] = new_enigma[i];
+					}
+					return is;
+				}
+				else return is;
+			}
+		}
+	}
+	else return is;
+	if (new_enigma[3])
+	{
+		for (int i = 0; i < K * N; i++)
+		{
+			helping_number = i / N;
+			enigma[helping_number][i % N] = new_enigma[i];
+		}
+		return is;
+	}
+	else return is;
+	/*int input;
 	for (int i = 0; i < K; i++)
 	{
 		std::cout << "Please enter numbers for " << i+1 << " wheel." << std::endl;
@@ -144,5 +283,5 @@ std::istream& operator>>(std::istream& is, Enigma& enigma)
 			enigma[i][j] = input;
 		}
 	}
-	return is;
+	return is;*/
 };
