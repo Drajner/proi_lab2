@@ -3,6 +3,7 @@
 #include <string>
 #include <array>
 #include <cstddef>
+#include <sstream>
 
 int main()
 {
@@ -12,6 +13,7 @@ int main()
     bool not_end = true;
     int input;
     std::string text;
+    std::stringstream ss(text);
     while (not_end)
     {
         std::cout << "In order to decrypt previously encrypted text you need to change machine state to " << std::endl;
@@ -42,7 +44,9 @@ int main()
                 std::cout << state;
                 break;
             case 4:
-                std::cin >> state;
+                std::cin >> text;
+                ss << text;
+                ss >> state;
                 break;
             case 5:
                 std::cout << enigma;
